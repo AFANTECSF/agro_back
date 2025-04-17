@@ -32,6 +32,13 @@ class Order extends Model implements ContractsAuditable
 
     protected $dates = ['scheduled_date', 'completed_at'];
 
+    protected $casts = [
+        'scheduled_date' => 'datetime',
+        'completed_at' => 'datetime',
+        'total_hectares' => 'decimal:3',
+        'total_amount' => 'decimal:2',
+    ];
+
     public function client()
     {
         return $this->belongsTo(Merchant::class, 'client_id');
@@ -75,5 +82,40 @@ class Order extends Model implements ContractsAuditable
     public function flights()
     {
         return $this->hasMany(Flight::class);
+    }
+
+    public function calculateTotalAmount()
+    {
+        return $this->total_hectares * $this->service->price_per_hectare;
+    }
+
+    public static function generateOrderNumber()
+    {
+        $lastOrder = self::latest()->first();
+        $lastNumber = $lastOrder ? intval(substr($lastOrder->order_number, 3)) : 0;
+
+        return 'ORD' . str_pad($lastNumber + 1, 6, '0', STR_PAD_LEFT);
+    }
+
+    public function lots()
+    {
+        return $this->belongsToMany(Lot::class, 'order_lots')
+            ->withPivot(['hectares'])
+            ->withTimestamps();
+    }
+
+    public function products()
+    {
+        return $this->belongsToMany(Product::class, 'order_products')
+            ->withPivot([
+                'client_provided_quantity',
+                'manual_total_quantity',
+                'manual_dosage_per_hectare',
+                'total_quantity_to_use',
+                'calculated_dosage',
+                'product_difference',
+                'difference_observation',
+            ])
+            ->withTimestamps();
     }
 }
