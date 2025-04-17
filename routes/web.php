@@ -7,6 +7,7 @@ use App\Http\Controllers\MerchantController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\OrderController;
 use Illuminate\Support\Facades\Route;
 
 require __DIR__ . '/auth.php';
@@ -30,5 +31,6 @@ Route::middleware(['auth', 'verified', 'permissions'])->group(function () {
     Route::resource('aircrafts', AircraftController::class);
     Route::resource('lots', LotController::class);
     Route::resource('products', ProductController::class);
+    Route::resource('orders', OrderController::class);
 });
 
